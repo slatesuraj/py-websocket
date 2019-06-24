@@ -1,3 +1,4 @@
+import json
 from twisted.internet import reactor
 from twisted.web.server import Site
 from twisted.web.static import File
@@ -22,8 +23,10 @@ class MyServerProtocol(WebSocketServerProtocol):
             print("Text message received: {0}".format(payload.decode('utf8')))
 
         # echo back message verbatim
-        self.sendMessage(payload, isBinary)
-        self.factory.broadcast(payload)
+        #self.sendMessage(payload, isBinary)
+        #self.factory.broadcast(payload)
+        data = json.loads(payload)
+        self.factory.unicast(data['data'], data['to'])
 
     def onClose(self, wasClean, code, reason):
         print("WebSocket connection closed: {0}".format(reason))
@@ -45,6 +48,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
         if client not in self.clients:
             print("registered client {}".format(client.peer))
             client.uid = uuid4().hex
+            print(client.uid)
             self.clients.append(client)
 
     def unregister(self, client):
@@ -61,8 +65,8 @@ class BroadcastServerFactory(WebSocketServerFactory):
     def unicast(self, msg, to):
         print("unicasting messge {}".format(msg))
         for c in self.clients:
-           if c.peer == to:
-               c.sendMessage(msg)
+           if c.uid == to:
+               c.sendMessage(str.encode(msg))
                print("message sent to {}".format(c.peer))
 
 class BroadcastPreparedServerFactory(BroadcastServerFactory):
