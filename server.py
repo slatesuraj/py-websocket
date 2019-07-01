@@ -47,8 +47,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
     def register(self, client):
         if client not in self.clients:
             print("registered client {}".format(client.peer))
-            client.uid = uuid4().hex
-            print(client.uid)
             self.clients.append(client)
 
     def unregister(self, client):
@@ -60,12 +58,12 @@ class BroadcastServerFactory(WebSocketServerFactory):
         print("broadcasting message '{}' ..".format(msg))
         for c in self.clients:
             c.sendMessage(msg)
-            print("message sent to {}".format(c.uid))
+            print("message sent to {}".format(c.peer))
 
     def unicast(self, msg, to):
         print("unicasting messge {}".format(msg))
         for c in self.clients:
-           if c.uid == to:
+           if c.peer == to:
                c.sendMessage(str.encode(msg))
                print("message sent to {}".format(c.peer))
 
