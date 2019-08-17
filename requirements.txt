@@ -1,4 +1,5 @@
 txaio
 twisted
 asyncio
-
+redis
+autobahn
